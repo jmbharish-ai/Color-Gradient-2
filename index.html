@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <script src="https://cdn.jsdelivr.net/npm/fraction.js@4.3.7/fraction.min.js"></script>
+        <style>
+            button{
+                width: 100px; height: 100px;
+                border: 5px solid white; border-radius: 0px;
+            }
+            input{
+                width: 100px; height: 30px;
+                background-color: white; color: black;
+                font-size: 25px; font-family: Arial;
+                border: 5px solid white; border-radius: 0px;
+            }
+        </style>
+    </head>
+    <body onclick="gradient()">
+        <div>
+            <input type="range" id="YB" min="0" max="1" value="0">
+            <input type="range" id="RG" min="0" max="1" value="0">
+            <br>
+            <p>Left</p>
+            <input type="number" id="lTL" value="1">
+            <input type="number" id="ybTL" value="0">
+            <input type="number" id="rgTL" value="0">
+            <p>Right</p>
+            <input type="number" id="lTR" value="1">
+            <input type="number" id="ybTR" value="0">
+            <input type="number" id="rgTR" value="0">
+            <br><br>
+            <div id="gradient"></div>
+            <br><br>
+            <p>Left</p>
+            <input type="number" id="lBL" value="0">
+            <input type="number" id="ybBL" value="0">
+            <input type="number" id="rgBL" value="0">
+            <p>Right</p>
+            <input type="number" id="lBR" value="0">
+            <input type="number" id="ybBR" value="0">
+            <input type="number" id="rgBR" value="0">
+        </div>
+        <script>
+            var divisions=8;
+            for(var i=0; i<=divisions; i++){
+                for(var j=0; j<=divisions; j++){
+                    button=document.createElement("button");
+                    button.id="button"+i+","+j;
+                    document.getElementById("gradient").appendChild(button);
+                }
+                document.getElementById("gradient").appendChild(document.createElement("br"));
+            }
+            function gradient(){
+                var YB;
+                if(document.getElementById("YB").value=="0")
+                    YB="Y";
+                else
+                    YB="B";
+                var RG;
+                if(document.getElementById("RG").value=="0")
+                    RG="R";
+                else
+                    RG="G";
+
+                //left
+                var lTL=document.getElementById("lTL").value; //top
+                var ybTL=document.getElementById("ybTL").value;
+                var rgTL=document.getElementById("rgTL").value;
+                var lBL=document.getElementById("lBL").value; //bottom
+                var ybBL=document.getElementById("ybBL").value;
+                var rgBL=document.getElementById("rgBL").value;
+
+                //right
+                var lTR=document.getElementById("lTR").value; //top
+                var ybTR=document.getElementById("ybTR").value;
+                var rgTR=document.getElementById("rgTR").value;
+                var lBR=document.getElementById("lBR").value; //bottom
+                var ybBR=document.getElementById("ybBR").value;
+                var rgBR=document.getElementById("rgBR").value;
+
+                for(var i=0; i<=divisions; i++){
+                    var place=1-i/divisions;
+                    var lL=place*lTL+(1-place)*lBL;
+                    var ybL=place*ybTL+(1-place)*ybBL;
+                    var rgL=place*rgTL+(1-place)*rgBL;
+
+                    var lR=place*lTR+(1-place)*lBR;
+                    var ybR=place*ybTR+(1-place)*ybBR;
+                    var rgR=place*rgTR+(1-place)*rgBR;
+
+                    for(var j=0; j<=divisions; j++){
+                        var place_=1-j/divisions;
+                        var l=place_*lL+(1-place_)*lR;
+                        var yb=place_*ybL+(1-place_)*ybR;
+                        var rg=place_*rgL+(1-place_)*rgR;
+                        document.getElementById("button"+i+","+j).style.backgroundColor=color(l, YB, yb, RG, rg);
+                    }
+                }
+            }
+            function color(L, YB, YBV, RG, RGV){
+                L=Fraction(L); YBV=Fraction(YBV); RGV=Fraction(RGV);
+                var R=0; var G=0; var B=0;
+                if(YB=="Y"&&RG=="R"){
+                    R=Fraction("1");
+                    if(greaterEqual(YBV, RGV)) G=(Fraction("1")).sub(RGV.div(Fraction("2"))); else G=((Fraction("1")).sub(RGV)).add(YBV.div(Fraction("2")));
+                    B=(Fraction("1")).sub(max());
+                }else if(YB=="Y"&&RG==""){
+                    R=Fraction("1");
+                    G=Fraction("1");
+                    B=(Fraction("1")).sub(YBV);
+                }else if(YB=="Y"&&RG=="G"){
+                    if(greaterEqual(YBV, RGV)) R=(Fraction("1")).sub(RGV.div(Fraction("2"))); else R=((Fraction("1")).sub(RGV)).add(YBV.div(Fraction("2")));
+                    G=Fraction("1");
+                    B=(Fraction("1")).sub(max());
+                }else if(YB==""&&RG=="R"){
+                    R=Fraction("1");
+                    G=(Fraction("1")).sub(RGV);
+                    B=(Fraction("1")).sub(RGV);
+                }else if(YB==""&&RG==""){
+                    R=Fraction("1");
+                    G=Fraction("1");
+                    B=Fraction("1");
+                }else if(YB==""&&RG=="G"){
+                    R=(Fraction("1")).sub(RGV);
+                    G=Fraction("1");
+                    B=(Fraction("1")).sub(RGV);
+                }else if(YB=="B"&&RG=="R"){
+                    if(greaterEqual(RGV, YBV)){R=Fraction("1"); B=((Fraction("1")).sub(RGV)).add(YBV);}
+                    else{R=((Fraction("1")).sub(YBV)).add(RGV); B=Fraction("1");}
+                    G=(Fraction("1")).sub(max());
+                }else if(YB=="B"&&RG==""){
+                    R=(Fraction("1")).sub(YBV);
+                    G=(Fraction("1")).sub(YBV);
+                    B=Fraction("1");
+                }else if(YB=="B"&&RG=="G"){
+                    if(greaterEqual(RGV, YBV)){G=Fraction("1"); B=((Fraction("1")).sub(RGV)).add(YBV);}
+                    else{G=((Fraction("1")).sub(YBV)).add(RGV); B=Fraction("1");}
+                    R=(Fraction("1")).sub(max());
+                }
+                R=L.mul(R); G=L.mul(G); B=L.mul(B);
+
+                R=(R.mul(Fraction("255"))).round().valueOf(); G=(G.mul(Fraction("255"))).round().valueOf(); B=(B.mul(Fraction("255"))).round().valueOf();
+                return "rgb("+R+", "+G+", "+B+")";
+                function max(){if(greaterEqual(YBV, RGV)) return YBV; else return RGV;}
+                function greaterEqual(first, next){if(first.compare(next)>=0) return true; else return false;} //greater than or equal to
+            }
+        </script>
+    </body>
+</html>
